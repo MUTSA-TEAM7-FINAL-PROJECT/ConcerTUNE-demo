@@ -1,0 +1,32 @@
+package com.team7.ConcerTUNE.dto;
+
+import com.team7.ConcerTUNE.entity.User;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserDto {
+    private Long id;
+    private String username;
+    private String email;
+    private String phoneNum;
+    private String bio;
+    private String profileImageUrl;
+    private String role;
+    public static UserDto fromEntity(User user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .bio(user.getBio())
+                .phoneNum(user.getPhoneNum())
+                .profileImageUrl(user.getProfileImageUrl())
+                .role(user.getAuth().name())
+                .build();
+    }
+}

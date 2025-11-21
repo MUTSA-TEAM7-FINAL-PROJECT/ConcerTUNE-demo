@@ -1,0 +1,81 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/concertune
+    driver-class-name: org.postgresql.Driver
+    username: concertune
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - openid
+              - profile
+              - email
+          spotify:
+            client-id: ${SPOTIFY_CLIENT_ID:}
+            client-secret: ${SPOTIFY_CLIENT_SECRET:}
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://127.0.0.1:8080/login/oauth2/code/{registrationId}"
+            scope:
+              - user-read-email
+              - playlist-read-private
+              - playlist-read-collaborative
+            client-name: spotify
+        provider:
+          spotify:
+            authorization-uri: https://accounts.spotify.com/authorize
+            token-uri: https://accounts.spotify.com/api/token
+            user-info-uri: https://api.spotify.com/v1/me
+            user-name-attribute: id
+
+jwt:
+  secret-b64: ${JWT_SECRET_B64:NGNlYmFlYmNmMWEyMjM0NWYyZjcxYzNlYjhiMmRhODAzZjBhYjFlNjdlZTZiYzE4ZWY0ZTJjMjM2NDMyN2Q3Ng==}
+  expiration: 3600000
+  refresh-expiration: 604800000
+
+aws:
+  access-key-id: ${AWS_SECRET_KEY:}
+  secret-access-key: ${AWS_ACCESS_KEY:}
+  region: ap-northeast-2
+  s3:
+    bucket-name: concertune-mutsa-team7
+    base-url:
+
+server:
+  port: 8080
+
+frontend:
+  url: ${FRONTEND_URL:http://localhost:5173}
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+file:
+  upload-dir: C:/uploads/profile-images
