@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { mockPosts } from "../../data/mockData";
+import { mockCommunityPosts } from "../../data/mockData";
 
 const getCategoryInfo = (category) => {
     switch (category) {
@@ -18,7 +18,10 @@ const TopWeeklyPosts = () => {
         const fetchTopPosts = async () => {
             setLoading(true);
             setTimeout(() => {
-                setPosts(mockPosts);
+                const topPosts = [...mockCommunityPosts]
+                    .sort((a, b) => b.likeCount - a.likeCount)
+                    .slice(0, 3);
+                setPosts(topPosts);
                 setLoading(false);
             }, 500);
         };
