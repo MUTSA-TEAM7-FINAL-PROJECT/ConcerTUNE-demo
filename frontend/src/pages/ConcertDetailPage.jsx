@@ -1,81 +1,49 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import InfiniteScrollPostList from './InfiniteScrollPostList'; 
-import concertService from "../services/concertService";
+import InfiniteScrollPostList from './InfiniteScrollPostList';
+import { mockConcertDetails } from "../data/mockData";
 import ChatWidget from "../components/modal/ChatWidget";
 import { useAuth } from "../context/AuthContext";
 
 const ConcertDetailPage = () => {
-    const { id: concertId } = useParams(); 
+    const { id: concertId } = useParams();
     const { isLoggedIn } = useAuth();
     const TABS = ["아티스트", "일정/가격", "자유게시판", "동행 게시판", "후기"];
-    const [activeTab, setActiveTab] = useState(TABS[0]); 
+    const [activeTab, setActiveTab] = useState(TABS[0]);
 
-    const [concert, setConcert] = useState(null); 
+    const [concert, setConcert] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     const [isHearted, setIsHearted] = useState(false);
-    const [isHeartLoading, setIsHeartLoading] = useState(false); 
+    const [isHeartLoading, setIsHeartLoading] = useState(false);
 
-    const checkBookmarkStatus = async () => {
-        if (!concertId || !isLoggedIn) {
-            setIsHearted(false); 
-            return;
-        }
-
-        try {
-            const hearted = await concertService.checkIsHearted(concertId);
-            setIsHearted(hearted);
-        } catch (err) {
-            console.warn("북마크 상태 확인 중 오류 발생:", err);
-            setIsHearted(false);
-        }
-    };
-    
     const handleToggleBookmark = async () => {
         if (!isLoggedIn) {
             alert("로그인이 필요합니다.");
             return;
         }
-        
+
         setIsHeartLoading(true);
-        try {
-            const newStatus = await concertService.toggleBookmark(concertId);
-            setIsHearted(newStatus);
-        } catch (err) {
-            console.error("북마크 토글 실패:", err);
-            alert("북마크 상태 변경에 실패했습니다.");
-        } finally {
+        setTimeout(() => {
+            setIsHearted(!isHearted);
             setIsHeartLoading(false);
-        }
+        }, 300);
     };
 
     useEffect(() => {
         const fetchConcertDetail = async () => {
-            if (!concertId || isNaN(concertId)) { 
+            if (!concertId || isNaN(concertId)) {
                 setLoading(false);
-                setError("잘못된 공연 ID입니다.");
                 return;
             }
 
-            try {
-                setLoading(true);
-                setError(null);
-                
-                const liveData = await concertService.getConcert(concertId); 
-                
-                setConcert(liveData); 
-                if (isLoggedIn) {
-                    await checkBookmarkStatus();
-                }
-            } catch (err) {
-                console.error("API Call Error:", err);
-                setError(err.message || "공연 정보를 불러오는 데 실패했습니다.");
-                setConcert(null); 
-            } finally {
+            setLoading(true);
+
+            setTimeout(() => {
+                const concertData = mockConcertDetails[concertId];
+                setConcert(concertData || null);
                 setLoading(false);
-            }
+            }, 500);
         };
 
         fetchConcertDetail();
@@ -206,7 +174,6 @@ const ConcertDetailPage = () => {
     );
     
     if (loading) return <div className="text-center mt-20 text-xl text-indigo-600">공연 정보를 로딩 중입니다...</div>;
-    if (error) return <div className="text-center mt-20 text-xl text-red-600">{error}</div>;
     if (!concert) return <div className="text-center mt-20 text-xl text-gray-500">존재하지 않는 공연입니다.</div>;
 
     // 초기 일정 정보 (메인 섹션에 표시할 첫 날짜와 시간)

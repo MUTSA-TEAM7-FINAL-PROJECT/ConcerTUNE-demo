@@ -1,10 +1,7 @@
-// components/home/TopWeeklyPosts.jsx
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import postService from "../../services/postService";
+import { mockPosts } from "../../data/mockData";
 
-// 카테고리 이름 및 색상 매핑 함수
 const getCategoryInfo = (category) => {
     switch (category) {
         case "review": return { name: "후기", color: "text-blue-600", bgColor: "bg-blue-100" };
@@ -16,20 +13,14 @@ const getCategoryInfo = (category) => {
 const TopWeeklyPosts = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchTopPosts = async () => {
-            try {
-                setLoading(true);
-                const data = await postService.getTop3WeeklyPosts();
-                setPosts(data);
-            } catch (err) {
-                console.error("인기 게시글 정보를 불러오는 데 실패했습니다:", err);
-                setError("인기 게시글 정보를 불러오는 데 실패했습니다.");
-            } finally {
+            setLoading(true);
+            setTimeout(() => {
+                setPosts(mockPosts);
                 setLoading(false);
-            }
+            }, 500);
         };
         fetchTopPosts();
     }, []);
@@ -44,10 +35,8 @@ const TopWeeklyPosts = () => {
             </h2>
             {loading ? (
                 <div className="text-center py-8 text-indigo-600">게시글 정보 로딩 중...</div>
-            ) : error ? (
-                <div className="text-center py-8 text-red-600">{error}</div>
             ) : (
-                <div className="space-y-4"> {/* 간격 조정 */}
+                <div className="space-y-4">
                     {posts.map((post) => {
                         const categoryInfo = getCategoryInfo(post.category);
                         const hasImage = post.imageUrls && post.imageUrls.length > 0;

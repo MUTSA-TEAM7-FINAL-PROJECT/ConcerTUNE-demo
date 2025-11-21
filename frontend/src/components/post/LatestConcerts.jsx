@@ -1,26 +1,18 @@
-// components/home/LatestConcerts.jsx
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import concertService from "../../services/concertService";
+import { mockConcerts } from "../../data/mockData";
 
 const LatestConcerts = () => {
     const [concerts, setConcerts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchLatestConcerts = async () => {
-            try {
-                setLoading(true);
-                const data = await concertService.getLatest4Concerts(); 
-                setConcerts(data);
-            } catch (err) {
-                console.error("최신 공연 정보를 불러오는 데 실패했습니다:", err);
-                setError("최신 공연 정보를 불러오는 데 실패했습니다.");
-            } finally {
+            setLoading(true);
+            setTimeout(() => {
+                setConcerts(mockConcerts);
                 setLoading(false);
-            }
+            }, 500);
         };
         fetchLatestConcerts();
     }, []);
@@ -35,8 +27,6 @@ const LatestConcerts = () => {
             </h2>
             {loading ? (
                 <div className="text-center py-8 text-indigo-600">공연 정보 로딩 중...</div>
-            ) : error ? (
-                <div className="text-center py-8 text-red-600">{error}</div>
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     {concerts.map((concert) => (

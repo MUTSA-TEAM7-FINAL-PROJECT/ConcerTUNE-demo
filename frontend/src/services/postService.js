@@ -1,35 +1,62 @@
-import api from "./api"; // axios 인스턴스 (token 포함 가능)를 가정
+import api from "./api";
+import { mockCommunityPosts } from "../data/mockData";
 
 const postService = {
 
   createPost: async (category, postData) => {
     try {
       const response = await api.post(`/api/posts/${category}`, postData);
-      return response.data; // PostDetailResponse 반환
+      return response.data;
     } catch (err) {
       console.error("게시글 등록 실패:", err.response || err);
       throw new Error(err.response?.data?.message || "게시글 등록에 실패했습니다.");
     }
   },
+
   getPostsByCategory: async (category, page = 0, size = 10, sort = 'createdAt,desc') => {
-    try { 
-    const response = await api.get(`/api/posts/category/${category}`, {
-      params: { page, size, sort }
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const filtered = mockCommunityPosts.filter(post => post.category === category);
+        const totalItems = filtered.length;
+        const totalPages = Math.ceil(totalItems / size);
+        const startIndex = page * size;
+        const endIndex = startIndex + size;
+        const content = filtered.slice(startIndex, endIndex);
+
+        resolve({
+          content,
+          totalPages,
+          totalElements: totalItems,
+          number: page,
+          size,
+          last: page >= totalPages - 1
+        });
+      }, 300);
     });
-    
-    return response.data; 
-    } catch (err) {
-    console.error(`[${category}] 게시글 목록 조회 실패:`, err.response || err);
-    throw new Error("게시글 목록을 불러오는 데 실패했습니다.");
-    }
   },
 
   getPostsByConcertAndCategory: async (concertId, category, page, size, sort) => {
-      const url = `/api/posts/live/${concertId}/category/${category}`; 
-      const response = await api.get(url, {
-          params: {page,size,sort,},
-      });
-      return response.data;
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const filtered = mockCommunityPosts.filter(
+          post => post.concertId === parseInt(concertId) && post.category === category
+        );
+        const totalItems = filtered.length;
+        const totalPages = Math.ceil(totalItems / size);
+        const startIndex = page * size;
+        const endIndex = startIndex + size;
+        const content = filtered.slice(startIndex, endIndex);
+
+        resolve({
+          content,
+          totalPages,
+          totalElements: totalItems,
+          number: page,
+          size,
+          last: page >= totalPages - 1
+        });
+      }, 300);
+    });
   },
 
   getPostDetail: async (postId) => {

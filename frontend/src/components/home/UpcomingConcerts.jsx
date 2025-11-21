@@ -1,43 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import concertService from '../../services/concertService'; 
-import { useAuth } from '../../context/AuthContext'; 
+import { mockUpcomingConcerts } from '../../data/mockData';
+import { useAuth } from '../../context/AuthContext';
 
 const UpcomingConcerts = () => {
     const { user } = useAuth();
     const [concerts, setConcerts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (!user || !user.id) {
             setLoading(false);
             setConcerts([]);
-            return; 
+            return;
         }
 
         const fetchPersonalizedConcerts = async () => {
-            
-            try {
-                setLoading(true);
-
-                const data = await concertService.getPersonalizedConcerts(user.id); 
-                setConcerts(data);
-                setError(null);
-            } catch (err) {
-                console.error("맞춤 공연 정보를 불러오는 데 실패했습니다:", err);
-                setError("추천 공연 정보를 불러오는 데 실패했습니다.");
-            } finally {
+            setLoading(true);
+            setTimeout(() => {
+                setConcerts(mockUpcomingConcerts);
                 setLoading(false);
-            }
+            }, 500);
         };
         fetchPersonalizedConcerts();
     }, [user]);
 
-    if (loading || error || concerts.length === 0) {
+    if (loading || concerts.length === 0) {
         if (loading) console.log('UpcomingConcerts: Loading');
-        if (error) console.error('UpcomingConcerts: Error', error);
-        if (!loading && !error && concerts.length === 0) console.log('UpcomingConcerts: No data');
+        if (!loading && concerts.length === 0) console.log('UpcomingConcerts: No data');
 
         return null;
     }

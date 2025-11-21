@@ -1,58 +1,47 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import concertService from "../services/concertService";
-
-// 백엔드에서 사용한 30가지 한국어 장르 목록
-const ALL_GENRES = [
-  "팝", "록", "힙합", "알앤비", "재즈", "클래식", 
-  "일렉트로닉", "포크", "컨트리", "블루스", "케이팝", 
-  "인디", "발라드", "메탈", "레게", "앰비언트", 
-  "하우스", "테크노", "트랜스", "가스펠", "OST/사운드트랙", 
-  "오페라", "트로트", "댄스", "펑크", "어쿠스틱", 
-  "소울", "디스코", "퓨전", "월드 뮤직"
-];
+import { mockConcertList } from "../data/mockData";
 
 const ConcertListPage = () => {
   const [concerts, setConcerts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
+
   const [page, setPage] = useState(0);
   const [size] = useState(9);
-  const [totalPages, setTotalPages] = useState(0); 
+  const [totalPages, setTotalPages] = useState(0);
   const [selectedGenre, setSelectedGenre] = useState("전체");
+
+  const availableGenres = useMemo(() => {
+    const genres = [...new Set(mockConcertList.map(concert => concert.genre))];
+    return genres.sort();
+  }, []);
 
   useEffect(() => {
     const fetchConcerts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const params = {
-            page: page,
-            size: size,
-        };
+      setLoading(true);
+
+      setTimeout(() => {
+        let filteredConcerts = mockConcertList;
 
         if (selectedGenre !== "전체") {
-            params.genre = selectedGenre;
+          filteredConcerts = mockConcertList.filter(
+            (concert) => concert.genre === selectedGenre
+          );
         }
 
-        const pageResponse = await concertService.getConcerts(params);
+        const totalItems = filteredConcerts.length;
+        const calculatedTotalPages = Math.ceil(totalItems / size);
+        const startIndex = page * size;
+        const endIndex = startIndex + size;
+        const paginatedConcerts = filteredConcerts.slice(startIndex, endIndex);
 
-        setConcerts(pageResponse.content); 
-        setTotalPages(pageResponse.totalPages);
-
-      } catch (err) {
-        console.error("공연 정보를 불러오는 데 실패했습니다:", err);
-        setError(err.message || "공연 정보를 불러오는 데 실패했습니다.");
-        setConcerts([]); 
-        setTotalPages(0);
-      } finally {
+        setConcerts(paginatedConcerts);
+        setTotalPages(calculatedTotalPages);
         setLoading(false);
-      }
+      }, 500);
     };
     fetchConcerts();
-    
+
   }, [selectedGenre, page, size]);
 
 
@@ -68,17 +57,17 @@ const ConcertListPage = () => {
         공연 전체 목록
       </h1>
       
-      <div className="mb-6 flex justify-center mb -8">
+      <div className="mb-6 flex justify-center mb-8">
         <select
           value={selectedGenre}
           onChange={(e) => {
             setSelectedGenre(e.target.value);
-            setPage(0); 
+            setPage(0);
           }}
           className="p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-lg"
         >
           <option value="전체">전체 장르</option>
-          {ALL_GENRES.map((genre) => (
+          {availableGenres.map((genre) => (
             <option key={genre} value={genre}>
               {genre}
             </option>
@@ -88,8 +77,6 @@ const ConcertListPage = () => {
 
       {loading ? (
         <p className="text-center text-xl text-indigo-600">로딩 중...</p>
-      ) : error ? (
-        <p className="text-center text-xl text-red-600">{error}</p>
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
@@ -141,7 +128,7 @@ const ConcertListPage = () => {
         </>
       )}
       
-      {concerts.length === 0 && !loading && !error && (
+      {concerts.length === 0 && !loading && (
         <p className="text-center text-xl text-gray-500 mt-10">
           조회된 공연이 없습니다.
         </p>
